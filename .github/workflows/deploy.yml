@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Se activa al hacer push a la rama que veo en tu foto
+      - main
 
 jobs:
   build:
@@ -16,8 +16,12 @@ jobs:
         with:
           channel: 'stable'
 
+      # --- ESTE ES EL PASO QUE FALTABA ---
+      - name: Install dependencies
+        run: flutter pub get
+
       - name: Build Web
-        # Importante: El base-href permite que las rutas funcionen en GitHub Pages
+        # Mantenemos el base-href para que los assets carguen bien en GitHub Pages
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
       - name: Deploy
