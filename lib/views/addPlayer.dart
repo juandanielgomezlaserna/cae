@@ -96,7 +96,7 @@ class _AddplayerState extends State<Addplayer> {
             SizedBox(height: 10,),
             InkWell(
               onTap: (){
-                if(controller.Players.length > 0){
+                if(controller.Players.length > 1){
                   Get.to(Addactions());
                 }
               },
