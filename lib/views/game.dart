@@ -1,5 +1,6 @@
 import 'package:cae/Global.dart';
 import 'package:cae/main.dart';
+import 'package:cae/views/assassinate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,74 +42,82 @@ class _GameState extends State<Game> {
               },
               blendMode: BlendMode.dstIn,   // Esta es la clave para que use la transparencia del gradiente
               child: SizedBox(
-                height: 397,
+                height: MediaQuery.of(context).size.height > 700 ? 397 : MediaQuery.of(context).size.height * 0.4,
                 child: SizedBox(
                   height: 397, // Aumenté un poco el alto para que se vean bien las filas
                   width: double.infinity,
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: controller.Players.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      // --- CAMBIO CLAVE: Al subir de 1.0 a 1.6, se vuelven rectangulares (menos altas) ---
-                      childAspectRatio: 1.6,
-                    ),
-                    itemBuilder: (context, i) {
-                      final player = controller.Players[i];
-                      final Color playerColor = player["color"];
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(19),
-                          color: playerColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            )
-                          ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculamos el ratio para que la altura sea SIEMPRE 110 (puedes cambiar este número)
+                      double itemHeight = 110;
+                      double itemWidth = (constraints.maxWidth - 10) / 2; // (Ancho total - spacing) / 2 columnas
+                      double fixedRatio = itemWidth / itemHeight;
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(10),
+                        itemCount: controller.Players.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: fixedRatio, // Aplicamos el ratio calculado
                         ),
-                        child: Column( // Usamos Stack para posicionar la calavera libremente
-                          children: [
-                            // Contenido del texto
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
+                        itemBuilder: (context, i) {
+                          final player = controller.Players[i];
+                          final Color playerColor = player["color"];
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(19),
+                              color: playerColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: Stack( // Stack es mejor para altura fija
+                              children: [
+                                // Texto del Jugador
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
+                                  child: Text(
                                     player['name'],
                                     style: GoogleFonts.dmSans(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                      fontSize: 16,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
-                              ),
-                            ),
-
-                            // Icono de Calavera con InkWell
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(50),
-                                onTap: () {
-                                  print("Eliminar o acción de calavera para: ${player['name']}");
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Image.asset("lib/assets/iconskull.png", width: 45,)
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
+
+                                // Calavera posicionada abajo a la derecha
+                                Positioned(
+                                  bottom: 5,
+                                  right: 5,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(50),
+                                      onTap: () => assassinate(context, player),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.asset(
+                                          "lib/assets/iconskull.png",
+                                          width: 40, // Tamaño fijo para la calavera
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
