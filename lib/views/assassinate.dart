@@ -1,5 +1,6 @@
 import 'package:cae/Global.dart';
 import 'package:cae/main.dart';
+import 'package:cae/views/winners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,7 +39,11 @@ void assassinate (context, player, index) {
                           InkWell(
                             onTap: (){
                               controller.assassinatePlayer(index);
+                              final playersWinners = controller.Players.where((item) => item["isDead"] == false).toList();
                               Get.back();
+                              if(playersWinners.length == 2){
+                                showWinners(context);
+                              }
                             },
                             child: Container(
                               height: 52,

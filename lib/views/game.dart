@@ -122,8 +122,13 @@ class _GameState extends State<Game> {
                                   // --- CAPA 3: EFECTO DE SANGRE (Solo si está muerto) ---
                                   if (isDead)
                                     Positioned.fill(
-                                      child: CustomPaint(
-                                        painter: BloodSlashPainter(),
+                                      child: InkWell(
+                                        onTap: (){
+                                          controller.resucitatePlayer(i);
+                                        },
+                                        child: CustomPaint(
+                                          painter: BloodSlashPainter(),
+                                        ),
                                       ),
                                     ),
                                 ],

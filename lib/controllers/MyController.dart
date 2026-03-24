@@ -83,6 +83,24 @@ class MyController extends GetxController{
     players.refresh();
   }
 
+  void resucitatePlayer(int index) {
+    players.value[index]["isDead"] = false;
+    players.refresh();
+  }
+
+  void resetGame () {
+    for (int i = 0; i < players.value.length; i++) {
+      final player = players.value[i];
+      players.value[i] = {
+        "name" : player["name"],
+        "color" : player["color"],
+        "isDead" : false
+      };
+    }
+
+    players.refresh();
+  }
+
   List get Players => players.value;
   int get Page => page.value;
 
