@@ -33,6 +33,7 @@ class MyController extends GetxController{
     players.value.add({
       "name" : name,
       "color" : color,
+      "isDead" : false
     });
     players.refresh();
   }
@@ -73,9 +74,13 @@ class MyController extends GetxController{
         "action": victim["action"],
       };
 
-      // 5. Removemos a esa víctima de la lista para que no se repita
       listForVictims.removeAt(victimIndex);
     }
+  }
+
+  void assassinatePlayer(int index) {
+    players.value[index]["isDead"] = true;
+    players.refresh();
   }
 
   List get Players => players.value;

@@ -202,7 +202,7 @@ class _AddactionsState extends State<Addactions> {
                       setState(() {
                         page++;
                       });
-                    }else{
+                    }else if(controller.Players[page]["action"] != null){
                       controller.delegateVictims();
                       controller.setPage(0);
                       Get.to(Delegateactions());

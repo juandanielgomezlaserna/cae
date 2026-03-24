@@ -3,6 +3,7 @@ import 'package:cae/main.dart';
 import 'package:cae/views/assassinate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Game extends StatefulWidget {
@@ -53,7 +54,7 @@ class _GameState extends State<Game> {
                       double itemWidth = (constraints.maxWidth - 10) / 2; // (Ancho total - spacing) / 2 columnas
                       double fixedRatio = itemWidth / itemHeight;
 
-                      return GridView.builder(
+                      return Obx(() => GridView.builder(
                         padding: const EdgeInsets.all(10),
                         itemCount: controller.Players.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -65,11 +66,13 @@ class _GameState extends State<Game> {
                         itemBuilder: (context, i) {
                           final player = controller.Players[i];
                           final Color playerColor = player["color"];
+                          final bool isDead = player["isDead"] ?? false; // Suponiendo que false es vivo y true es muerto
 
                           return Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(19),
-                              color: playerColor,
+                              // Si está muerto, bajamos la opacidad del color de fondo
+                              color: isDead ? playerColor.withOpacity(0.3) : playerColor,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.1),
@@ -78,47 +81,57 @@ class _GameState extends State<Game> {
                                 )
                               ],
                             ),
-                            child: Stack( // Stack es mejor para altura fija
-                              children: [
-                                // Texto del Jugador
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
-                                  child: Text(
-                                    player['name'],
-                                    style: GoogleFonts.dmSans(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                            child: ClipRRect( // Para que la sangre no se salga de los bordes redondeados
+                              borderRadius: BorderRadius.circular(19),
+                              child: Stack(
+                                children: [
+                                  // --- CAPA 1: TEXTO DEL JUGADOR ---
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
+                                    child: Text(
+                                      player['name'],
+                                      style: GoogleFonts.dmSans(
+                                        // Si está muerto, el texto también se vuelve opaco
+                                        color: isDead ? Colors.black38 : Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
 
-                                // Calavera posicionada abajo a la derecha
-                                Positioned(
-                                  bottom: 5,
-                                  right: 5,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(50),
-                                      onTap: () => assassinate(context, player),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Image.asset(
-                                          "lib/assets/iconskull.png",
-                                          width: 40, // Tamaño fijo para la calavera
+                                  // --- CAPA 2: ICONO DE CALAVERA (Solo si está vivo) ---
+                                  if (!isDead)
+                                    Positioned(
+                                      bottom: 5,
+                                      right: 5,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(50),
+                                        onTap: () => assassinate(context, player, i),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Image.asset(
+                                            "lib/assets/iconskull.png",
+                                            width: 40,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                              ],
+
+                                  // --- CAPA 3: EFECTO DE SANGRE (Solo si está muerto) ---
+                                  if (isDead)
+                                    Positioned.fill(
+                                      child: CustomPaint(
+                                        painter: BloodSlashPainter(),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                           );
                         },
-                      );
+                      ));
                     },
                   ),
                 ),
@@ -129,4 +142,25 @@ class _GameState extends State<Game> {
       ),
     );
   }
+}
+
+class BloodSlashPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Global.primary
+      ..strokeWidth = 6.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final path = Path();
+
+    // Dibujamos una línea diagonal un poco irregular (zig-zag sutil)
+    path.lineTo(size.width * 1, size.height * 1);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
