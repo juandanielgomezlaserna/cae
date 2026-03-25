@@ -10,6 +10,7 @@ class MyController extends GetxController{
   final players = [].obs;
   final colors = List.from(Global.colors).obs;
   final page = 0.obs;
+  final initialData = [].obs;
 
   void setSplash () {
     timer?.cancel();
@@ -49,37 +50,52 @@ class MyController extends GetxController{
   }
 
   void delegateVictims() {
-    // 1. Creamos una copia de la lista original
-    List listForVictims = List.from(players.value);
+    List originalPlayers = List.from(players.value);
+    List victimList = List.from(players.value);
 
-    // 2. Barajamos la lista de víctimas aleatoriamente
-    listForVictims.shuffle();
+    bool hasSelfVictim = true;
 
-    for (int i = 0; i < players.value.length; i++) {
-      var currentPlayer = players.value[i];
+    // Re-barajamos hasta que nadie sea su propia víctima
+    while (hasSelfVictim) {
+      victimList.shuffle();
+      hasSelfVictim = false;
 
-      // 3. Buscamos una víctima que no sea el mismo jugador
-      // Si el primer elemento de la lista de víctimas es el mismo jugador,
-      // tomamos el último de la lista (o el siguiente).
-      int victimIndex = 0;
-      if (listForVictims[victimIndex]["name"] == currentPlayer["name"]) {
-        victimIndex = listForVictims.length - 1;
+      for (int i = 0; i < originalPlayers.length; i++) {
+        if (originalPlayers[i]["name"] == victimList[i]["name"]) {
+          hasSelfVictim = true;
+          break;
+        }
       }
-
-      var victim = listForVictims[victimIndex];
-
-      // 4. Asignamos la víctima
-      currentPlayer["victim"] = {
-        "name": victim["name"],
-        "action": victim["action"],
-      };
-
-      listForVictims.removeAt(victimIndex);
     }
+
+    // Una vez que tenemos una lista válida, asignamos
+    for (int i = 0; i < players.value.length; i++) {
+      players.value[i]["victim"] = {
+        "name": victimList[i]["name"],
+        "action": victimList[i]["action"], // Asegúrate de que las acciones ya existan
+      };
+    }
+
+    players.refresh();
   }
 
   void assassinatePlayer(int index) {
-    players.value[index]["isDead"] = true;
+    final deadPlayer = players.value[index];
+    deadPlayer["isDead"] = true;
+
+    // Buscamos al asesino de forma segura
+    final assassin = players.value.firstWhere(
+          (item) => item["victim"] != null && item["victim"]["name"] == deadPlayer["name"],
+      orElse: () => {},
+    );
+
+    if (assassin != null) {
+      // EL ASESINO HEREDA LA VÍCTIMA DEL MUERTO
+      assassin["victim"] = deadPlayer["victim"];
+      // El muerto ya no tiene víctima (para evitar bucles)
+      deadPlayer["victim"] = null;
+    }
+
     players.refresh();
   }
 

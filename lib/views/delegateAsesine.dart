@@ -1,15 +1,12 @@
 import 'package:cae/Global.dart';
 import 'package:cae/main.dart';
-import 'package:cae/views/delegateAsesine.dart';
 import 'package:cae/views/winners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void assassinate(context, player, index) {
-  final assesine = controller.Players.where((item) => item["victim"] != null && item["victim"]["name"] == player["name"]).toList()[0];
-  if (assesine["name"] == null) return;
+void delegateAsesine (context, player) {
   showDialog(
     context: context,
     builder: (context) {
@@ -33,54 +30,20 @@ void assassinate(context, player, index) {
                   mainAxisSize: MainAxisSize.min, // <--- CLAVE: El modal solo mide lo que miden sus hijos
                   children: [
                     Text('${player["name"]}', style: const TextStyle(fontSize: 29, height: 1)),
-                    SizedBox(height: 10),
-                    Divider(color: Global.secondary,),
-                    SizedBox(height: 10),
-                    Text('Morirá a manos de:', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
+                    Text('Ahora su victima es:', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
                     Text(
-                      '${assesine['name'] == player['name'] ? 'Enhorabuena, ${player["name"]} mató su asesino' : assesine["name"]}',
+                      '${player['victim']['name']}',
                       style: GoogleFonts.dmSans(fontSize: 24, fontWeight: FontWeight.w500),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 10),
-                    Divider(color: Global.secondary,),
-                    SizedBox(height: 10),
-                    Text('Por:', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
-                    Icon(player["action"]["icon"], size: 50, color: Global.secondary),
-                    Text('${player["action"]["action"]}', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
+                    Text('Morirá por:', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
+                    Icon(player["victim"]["action"]["icon"], size: 50, color: Global.secondary),
+                    Text('${player['victim']["action"]["action"]}', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.w500)),
                     Text(
                       '${player["action"]["description"]}',
                       style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w400),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
-                    assesine['name'] == player['name'] ? SizedBox() :
-                    InkWell(
-                      onTap: () {
-                        controller.assassinatePlayer(index);
-                        final playersWinners = controller.Players.where((item) => item["isDead"] == false).toList();
-                        Get.back();
-                        if (playersWinners.length == 2) {
-                          showWinners(context);
-                        }else{
-                          delegateAsesine(context, assesine);
-                        }
-                      },
-                      child: Container(
-                        height: 52,
-                        width: 135,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: Global.secondary,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "ASESINAR",
-                            style: TextStyle(color: Global.white, fontSize: 19, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    )
                   ],
                 ),
               ),

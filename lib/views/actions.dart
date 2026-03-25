@@ -70,104 +70,106 @@ class _AddactionsState extends State<Addactions> {
                 return LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white,           // Arriba: totalmente visible
-                    Colors.white,           // Se mantiene visible la mayor parte
-                    Colors.transparent,     // Al final: se desvanece a transparente
-                  ],
-                  stops: [0.0, 0.85, 1.0],  // El desvanecimiento empieza al 85% de la altura
+                  colors: [Colors.white, Colors.white, Colors.transparent],
+                  stops: [0.0, 0.85, 1.0],
                 ).createShader(bounds);
               },
-              blendMode: BlendMode.dstIn,   // Esta es la clave para que use la transparencia del gradiente
-              child: SizedBox(
-                height: 397,
-                child: SizedBox(
-                  height: 397, // Aumenté un poco el alto para que se vean bien las filas
-                  width: double.infinity,
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: actionsData.length,
-                    // Configuración de la cuadrícula
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,          // 2 columnas
-                      crossAxisSpacing: 10,       // Espacio horizontal entre tarjetas
-                      mainAxisSpacing: 10,        // Espacio vertical entre tarjetas
-                      childAspectRatio: 1,        // Esto las hace perfectamente CUADRADAS
-                    ),
-                    itemBuilder: (context, i) {
-                      final action = actionsData[i];
-                      final Color playerColor = controller.Players[page]["color"];
+              blendMode: BlendMode.dstIn,
+              child: Container( // Cambiamos SizedBox por Container para mejor manejo
+                height: MediaQuery.of(context).size.height > 700 ? 400 : MediaQuery.of(context).size.height * 0.4,
+                width: double.infinity,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    double itemHeight = 110;
+                    double itemWidth = (constraints.maxWidth - 30) / 2; // Ajusté el padding
+                    double fixedRatio = itemWidth / itemHeight;
 
-                      return InkWell(
-                        onTap: (){
-                          controller.players.value[page]["action"] = action;
-                          controller.players.refresh();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(19),
-                            color: controller.Players[page]["action"] == null ?
-                            playerColor.withOpacity(0.9) :
-                            controller.Players[page]["action"]["action"]  == action["action"]
-                                ? Global.primary.withOpacity(0.9) :
-                            playerColor.withOpacity(0.9), // Un poco de transparencia queda mejor en Grid
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              )
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: i % 2 == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                            children: [
-                              // Icono en la parte superior
-                              Icon(action["icon"], color: Colors.black, size: 28),
+                    return GridView.builder(
+                      // FISICA: Esto asegura que el scroll se sienta fluido en iOS y Android
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.all(10),
+                      itemCount: actionsData.length, // Asegúrate que sea el largo de tus acciones
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: fixedRatio,
+                      ),
+                      itemBuilder: (context, i) {
+                        final action = actionsData[i];
+                        final Color playerColor = controller.Players[page]["color"];
 
-                              // Espacio flexible para el texto para que NUNCA se desborde
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: i % 2 == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      action["action"],
-                                      style: GoogleFonts.dmSans(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis, // Si es muy largo pone "..."
-                                      textAlign: i % 2 == 0 ? TextAlign.left : TextAlign.right,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    if (action["description"] != "")
-                                      Flexible(
-                                        child: Text(
-                                          action["description"],
-                                          style: GoogleFonts.dmSans(
-                                              color: Colors.black54,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                          maxLines: 3, // Límite para la descripción
-                                          overflow: TextOverflow.visible, // Permite que se vea lo más posible
-                                          textAlign: i % 2 == 0 ? TextAlign.left : TextAlign.right,
+                        return InkWell(
+                          onTap: (){
+                            controller.players.value[page]["action"] = action;
+                            controller.players.refresh();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(19),
+                              color: controller.Players[page]["action"] == null ?
+                              playerColor.withOpacity(0.9) :
+                              controller.Players[page]["action"]["action"]  == action["action"]
+                                  ? Global.primary.withOpacity(0.9) :
+                              playerColor.withOpacity(0.9), // Un poco de transparencia queda mejor en Grid
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: i % 2 == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                              children: [
+                                // Icono en la parte superior
+                                Icon(action["icon"], color: Colors.black, size: 28),
+
+                                // Espacio flexible para el texto para que NUNCA se desborde
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: i % 2 == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        action["action"],
+                                        style: GoogleFonts.dmSans(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis, // Si es muy largo pone "..."
+                                        textAlign: i % 2 == 0 ? TextAlign.left : TextAlign.right,
                                       ),
-                                  ],
+                                      const SizedBox(height: 4),
+                                      if (action["description"] != "")
+                                        Flexible(
+                                          child: Text(
+                                            action["description"],
+                                            style: GoogleFonts.dmSans(
+                                                color: Colors.black54,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600
+                                            ),
+                                            maxLines: 3, // Límite para la descripción
+                                            overflow: TextOverflow.visible, // Permite que se vea lo más posible
+                                            textAlign: i % 2 == 0 ? TextAlign.left : TextAlign.right,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),
@@ -205,7 +207,7 @@ class _AddactionsState extends State<Addactions> {
                     }else if(controller.Players[page]["action"] != null){
                       controller.delegateVictims();
                       controller.setPage(0);
-                      Get.to(Delegateactions());
+                      Get.to(() => Delegateactions());
                     }
                   },
                   child: Container(

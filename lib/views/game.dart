@@ -27,6 +27,28 @@ class _GameState extends State<Game> {
             Center(child: Image.asset("lib/assets/logotipo.png", width: 165,)),
             SizedBox(height: 5,),
             Text("Juego", style: GoogleFonts.dmSans(color: Global.white, fontSize: 24, fontWeight: FontWeight.bold),),
+            SizedBox(height: 10,),
+            InkWell(
+              onTap: (){
+                // Creamos una lista nueva con MAPAS NUEVOS (copia profunda)
+                controller.players.value = controller.initialData.map((player) {
+                  return Map<dynamic, dynamic>.from(player)..["isDead"] = false;
+                }).toList();
+
+                controller.players.refresh();
+
+                setState(() {});
+              },
+              child: Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Global.primary
+                ),
+                child: Icon(CupertinoIcons.restart, color: Global.white,)
+              ),
+            ),
             SizedBox(height: 40,),
             ShaderMask(
               shaderCallback: (Rect bounds) {
@@ -108,7 +130,9 @@ class _GameState extends State<Game> {
                                       right: 5,
                                       child: InkWell(
                                         borderRadius: BorderRadius.circular(50),
-                                        onTap: () => assassinate(context, player, i),
+                                        onTap: (){
+                                          assassinate(context, player, i);
+                                        },
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Image.asset(

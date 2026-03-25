@@ -140,7 +140,9 @@ class _RevealCardState extends State<RevealCard> {
                         ),
                         onPressed: () {
                           if(widget.nextPlayerName == ""){
-                            Get.to(const Game());
+                            controller.initialData.value = controller.players.value.map((p) => Map<String, dynamic>.from(p)).toList();
+                            print(controller.initialData.value);
+                            Get.to(() => Game());
                           } else {
                             controller.setPage(controller.Page + 1);
                             setState(() {
